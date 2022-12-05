@@ -26,49 +26,58 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const mqtt_1 = __importDefault(require("mqtt"));
+// import mqtt from 'mqtt'
 const dotenv = __importStar(require("dotenv"));
-const Users_1 = __importDefault(require("./controllers/Users"));
+//import clinic from './controllers/Clinics'
 const mongoose_1 = __importDefault(require("mongoose"));
+//
 dotenv.config();
 // Variables
-const mongoURI = 'mongodb://localhost:27017/users';
-const client = mqtt_1.default.connect(process.env.MQTT_URI || 'mqtt://localhost:1883');
+const mongoURI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/clinicsDB';
+// const clinic = mqtt.connect(process.env.MQTT_URI || 'mqtt://localhost:1883')
 // Connect to MongoDB
-mongoose_1.default.connect(mongoURI);
-client.on('connect', () => {
-    client.subscribe('auth/create/user');
-    client.subscribe('auth/login/user');
-    client.subscribe('auth/getall/users');
-    client.subscribe('auth/update/users');
-    client.subscribe('auth/delete/user');
-    client.publish('auth/create/user', 'haloo');
-});
-client.on('message', (topic, message) => {
-    switch (topic) {
-        case 'auth':
-            // eslint-disable-next-line no-console
-            console.log(message.toString());
-            client.end();
-            break;
-        case 'auth/create/user':
-            // call createUser function
-            Users_1.default.createUser('victor', 'campanello', '123456789', 'druner@gmail.com', 'Password123', 'Password123', '123456789');
-            // eslint-disable-next-line no-console
-            break;
-        case 'auth/login/user':
-            // call loginUser function
-            // eslint-disable-next-line no-console
-            console.log("testing mqtt");
-            break;
-        case 'auth/getall/users':
-            // call getAllUsers function
-            break;
-        case 'auth/update/user':
-            // call updateUser function
-            break;
-        case 'auth/delete/user':
-            // call deleteUser function
-            break;
+mongoose_1.default.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true }, (err) => {
+    if (err) {
+        // eslint-disable-next-line no-console
+        console.error(err);
+    }
+    else if (process.env.NODE_ENV !== 'production') {
+        // eslint-disable-next-line no-console
+        console.log('Connected to MongoDB');
     }
 });
+/*
+client.on('connect', () => {
+  client.subscribe('auth/user/create')
+  client.subscribe('auth/user/login')
+  client.subscribe('auth/users/getall')
+  client.subscribe('auth/users/update')
+  client.subscribe('auth/user/delete')
+})
+
+client.on('message', async (topic: string, message:Buffer) => {
+  switch (topic) {
+    case 'auth/user/create': {
+      // call createUser function
+      const newUser = await user.createUser(message.toString())
+      client.publish('gateway/user/create', JSON.stringify(newUser))
+      break
+    }
+    case 'auth/user/login': {
+      // call loginUser function
+      const loggedIn = await user.login(message.toString())
+      client.publish('gateway/user/login', JSON.stringify(loggedIn))
+      break
+    }
+    case 'auth/users/all':
+      // call getAllUsers function
+      break
+    case 'auth/user/update':
+      // call updateUser function
+      break
+    case 'auth/user/delete':
+      // call deleteUser function
+      break
+  }
+})
+*/

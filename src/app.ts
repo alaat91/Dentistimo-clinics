@@ -1,6 +1,6 @@
-import mqtt from 'mqtt'
+// import mqtt from 'mqtt'
 import * as dotenv from 'dotenv'
-import user from './controllers/Clinics'
+//import clinic from './controllers/Clinics'
 import mongoose, { ConnectOptions } from 'mongoose'
 
 //
@@ -8,7 +8,7 @@ dotenv.config()
 
 // Variables
 const mongoURI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/clinicsDB'
-const client = mqtt.connect(process.env.MQTT_URI || 'mqtt://localhost:1883')
+// const clinic = mqtt.connect(process.env.MQTT_URI || 'mqtt://localhost:1883')
 
 // Connect to MongoDB
 mongoose.connect(
