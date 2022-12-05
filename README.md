@@ -1,4 +1,4 @@
-# dentistimo-clinics
+# dentistimo-auth
 
 
 
@@ -15,14 +15,14 @@ Already a pro? Just edit this README.md and make it your own. Want to make it ea
 
 ```
 cd existing_repo
-git remote add origin https://git.chalmers.se/courses/dit355/dit356-2022/t-1/dentistimo-clinics.git
+git remote add origin https://git.chalmers.se/shariqs/dentistimo-auth.git
 git branch -M main
 git push -uf origin main
 ```
 
 ## Integrate with your tools
 
-- [ ] [Set up project integrations](https://git.chalmers.se/courses/dit355/dit356-2022/t-1/dentistimo-clinics/-/settings/integrations)
+- [ ] [Set up project integrations](https://git.chalmers.se/shariqs/dentistimo-auth/-/settings/integrations)
 
 ## Collaborate with your team
 
