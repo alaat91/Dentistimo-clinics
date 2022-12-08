@@ -1,14 +1,14 @@
-// import mqtt from 'mqtt'
+import mqtt from 'mqtt'
 import * as dotenv from 'dotenv'
-//import clinic from './controllers/Clinics'
+import clinic from './controllers/Clinics'
 import mongoose, { ConnectOptions } from 'mongoose'
 
 //
 dotenv.config()
 
 // Variables
-const mongoURI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/clinicsDB'
-// const clinic = mqtt.connect(process.env.MQTT_URI || 'mqtt://localhost:1883')
+const mongoURI = process.env.MONGO_URI || 'mongodb://localhost:27017/clinics'
+const client = mqtt.connect(process.env.MQTT_URI || 'mqtt://localhost:1883')
 
 // Connect to MongoDB
 mongoose.connect(
@@ -25,38 +25,32 @@ mongoose.connect(
   }
 )
 
-/*
 client.on('connect', () => {
-  client.subscribe('auth/user/create')
-  client.subscribe('auth/user/login')
-  client.subscribe('auth/users/getall')
-  client.subscribe('auth/users/update')
-  client.subscribe('auth/user/delete')
+  client.subscribe('clinic/post')
 })
 
-client.on('message', async (topic: string, message:Buffer) => {
+client.on('message', async(topic: string, message: Buffer) => {
   switch (topic) {
-    case 'auth/user/create': {
+    case 'clinic/post': {
       // call createUser function
-      const newUser = await user.createUser(message.toString())
-      client.publish('gateway/user/create', JSON.stringify(newUser))
+      // eslint-disable-next-line no-console
+      console.log('kladdkaka2')
+      const newClinic = await clinic.createClinic(message.toString())
+      client.publish('gateway/clinic/post', JSON.stringify(newClinic))
       break
     }
-    case 'auth/user/login': {
-      // call loginUser function
-      const loggedIn = await user.login(message.toString())
-      client.publish('gateway/user/login', JSON.stringify(loggedIn))
+    case 'clinic/get': {
+      // call getClinic function
       break
     }
-    case 'auth/users/all':
-      // call getAllUsers function
+    case 'clinic/getall':
+      // call getAllClinics function
       break
-    case 'auth/user/update':
-      // call updateUser function
+    case 'clinic/update':
+      // call updateClinic function
       break
-    case 'auth/user/delete':
-      // call deleteUser function
+    case 'clinic/delete':
+      // call deleteClinic function
       break
   }
 })
-*/
