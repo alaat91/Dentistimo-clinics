@@ -62,8 +62,8 @@ async function getClinic(message: string) {
 // delete specific clinic given the ID
 async function deleteClinic(message: string) {
   try {
-    const userInfo = JSON.parse(message)
-    const id = userInfo
+    const clinicInfo = JSON.parse(message)
+    const id = clinicInfo
     const clinic = await Clinic.findOneAndDelete(id)
     
     if (!clinic) {
@@ -86,7 +86,32 @@ async function deleteClinic(message: string) {
   }
 }
 
-// TODO updateClinic
+// update specific clinic given the ID
+async function updateClinic(message: string) {
+  try {
+    const clinicInfo = JSON.parse(message)
+    const id = clinicInfo
+    const clinic = await Clinic.findOneAndUpdate(id)
+    
+    if (!clinic) {
+      return 'Invalid clinic ID'
+    }
+  
+    if (clinic === null) {
+      return 'Clinic does not exist'
+    }
+  
+    // eslint-disable-next-line no-console
+    console.log(clinic)
+    return 'Clinic has been updated'
+  } 
+    
+  catch (error) {
+    // eslint-disable-next-line no-console
+    console.log(error)
+    return error
+  }
+}
 
 // export funtions
-export default { createClinic, getClinic, deleteClinic }
+export default { createClinic, getClinic, deleteClinic, updateClinic }
