@@ -3,13 +3,11 @@ import Clinic from '../models/Clinic'
 // method that creates a new clinic if not already existing
 async function createClinic(message: string) {
   // eslint-disable-next-line no-console
-  console.log('kladdkaka1')
   try {
-    const userInfo = JSON.parse(message)
-    const { name, owner, dentists, adress, coordinates , openingHours } = userInfo
+    const clinicInfo = JSON.parse(message)
+    const { name, owner, dentists, adress, coordinates , openingHours } = clinicInfo
   
     // eslint-disable-next-line no-console
-    console.log('kladdkaka5')
     if (!(name && owner && dentists && adress && coordinates && openingHours))
       return 'All input is required'
   
@@ -21,12 +19,10 @@ async function createClinic(message: string) {
       return 'Clinic already exists'
 
     // eslint-disable-next-line no-console
-    console.log('kladdkaka4')
 
     const clinic = new Clinic({ name, owner, dentists, adress, coordinates, openingHours })
 
     // eslint-disable-next-line no-console
-    console.log('kladdkaka3')
     clinic.save()
 
     // eslint-disable-next-line no-console
@@ -37,7 +33,28 @@ async function createClinic(message: string) {
   }
 }
 
-// TODO getClinic
+// return specific clinic given the ID
+async function getClinic(message: string) {
+  try {
+    const clinicInfo = JSON.parse(message)
+    const { id } = clinicInfo
+
+    if (!(id))
+      return 'ID is missing'
+
+    // find existing clinic from DB
+    const existingClinic = Clinic.findById(id)
+
+    // check if clinic already exists
+    if (existingClinic === null)
+      return 'Clinic does not exist'
+
+    return existingClinic
+
+  } catch (error) {
+    return 'Missing JSON file?'
+  }
+}
 
 // TODO getAllClinics
 
@@ -46,4 +63,4 @@ async function createClinic(message: string) {
 // TODO updateClinic
 
 // export funtions
-export default { createClinic }
+export default { createClinic, getClinic }
