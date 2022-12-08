@@ -59,9 +59,34 @@ async function getClinic(message: string) {
 
 // TODO getAllClinics
 
-// TODO deleteClinic
+// delete specific clinic given the ID
+async function deleteClinic(message: string) {
+  try {
+    const userInfo = JSON.parse(message)
+    const id = userInfo
+    const clinic = await Clinic.findOneAndDelete(id)
+    
+    if (!clinic) {
+      return 'Invalid clinic ID'
+    }
+  
+    if (clinic === null) {
+      return 'Clinic does not exist'
+    }
+  
+    // eslint-disable-next-line no-console
+    console.log(clinic)
+    return 'Clinic has been deleted'
+  } 
+    
+  catch (error) {
+    // eslint-disable-next-line no-console
+    console.log(error)
+    return error
+  }
+}
 
 // TODO updateClinic
 
 // export funtions
-export default { createClinic, getClinic }
+export default { createClinic, getClinic, deleteClinic }
