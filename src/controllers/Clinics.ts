@@ -2,13 +2,14 @@ import Clinic from '../models/Clinic'
 
 // method that creates a new clinic if not already existing
 async function createClinic(message: string) {
-  // eslint-disable-next-line no-console
   try {
+    // eslint-disable-next-line no-console
+    console.log(message)
     const clinicInfo = JSON.parse(message)
-    const { name, owner, dentists, adress, coordinates , openingHours } = clinicInfo
+    const { name, owner, dentists, address, city, coordinate, openinghours } = clinicInfo
   
     // eslint-disable-next-line no-console
-    if (!(name && owner && dentists && adress && coordinates && openingHours))
+    if (!(name && owner && dentists && address && city && coordinate && openinghours))
       return 'All input is required'
   
     // find existing clinic from DB
@@ -18,18 +19,18 @@ async function createClinic(message: string) {
     if ((await existingClinic).length > 0)
       return 'Clinic already exists'
 
-    // eslint-disable-next-line no-console
-
-    const clinic = new Clinic({ name, owner, dentists, adress, coordinates, openingHours })
-
-    // eslint-disable-next-line no-console
-    clinic.save()
+    // create new clinic
+    const clinic = new Clinic({ name, owner, dentists, address, city, coordinate, openinghours })
 
     // eslint-disable-next-line no-console
     console.log(clinic)
+
+    // save new clinic to database
+    clinic.save()
+    return 'Clinic has been created and saved to database'
     
   } catch (error) {
-    return 'Something went wrong!'
+    return 'Something is wrong with the JSON data'
   }
 }
 
