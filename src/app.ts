@@ -28,6 +28,7 @@ mongoose.connect(
 client.on('connect', () => {
   client.subscribe('clinic/post')
   client.subscribe('clinic/get')
+  client.subscribe('clinic/delete')
 })
 
 client.on('message', async(topic: string, message: Buffer) => {
@@ -54,6 +55,9 @@ client.on('message', async(topic: string, message: Buffer) => {
       break
     case 'clinic/delete':
       // call deleteClinic function
+      // eslint-disable-next-line no-case-declarations
+      const deletedClinic = await clinic.deleteClinic(message.toString())
+      client.publish('gateway/clinic/delete', JSON.stringify(deletedClinic))
       break
   }
 })
