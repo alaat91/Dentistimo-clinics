@@ -29,6 +29,7 @@ client.on('connect', () => {
   client.subscribe('clinic/post')
   client.subscribe('clinic/get')
   client.subscribe('clinic/delete')
+  client.subscribe('clinic/update')
 })
 
 client.on('message', async(topic: string, message: Buffer) => {
@@ -50,14 +51,19 @@ client.on('message', async(topic: string, message: Buffer) => {
     case 'clinic/getall':
       // call getAllClinics function
       break
-    case 'clinic/update':
+    case 'clinic/update': {
       // call updateClinic function
+      // eslint-disable-next-line no-case-declarations
+      const updatedClinic = await clinic.updateClinic(message.toString())
+      client.publish('gateway/clinic/delete', JSON.stringify(updatedClinic))
       break
-    case 'clinic/delete':
+    }
+    case 'clinic/delete': {
       // call deleteClinic function
       // eslint-disable-next-line no-case-declarations
       const deletedClinic = await clinic.deleteClinic(message.toString())
       client.publish('gateway/clinic/delete', JSON.stringify(deletedClinic))
       break
+    }
   }
 })
