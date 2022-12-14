@@ -2,6 +2,7 @@ import mqtt from 'mqtt'
 import * as dotenv from 'dotenv'
 import clinic from './controllers/Clinics'
 import mongoose, { ConnectOptions } from 'mongoose'
+import dentists from './controllers/Dentists'
 
 //
 dotenv.config()
@@ -18,7 +19,7 @@ mongoose.connect(
     if (err) {
       // eslint-disable-next-line no-console
       console.error(err)
-    } else if(process.env.NODE_ENV !== 'production') {
+    } else if (process.env.NODE_ENV !== 'production') {
       // eslint-disable-next-line no-console
       console.log('Connected to MongoDB')
     }
@@ -26,43 +27,69 @@ mongoose.connect(
 )
 
 client.on('connect', () => {
-  client.subscribe('clinic/post')
-  client.subscribe('clinic/get')
-  client.subscribe('clinic/delete')
-  client.subscribe('clinic/update')
+  client.subscribe('clinics/#')
 })
 
-client.on('message', async(topic: string, message: Buffer) => {
+client.on('message', async (topic: string, message: Buffer) => {
   switch (topic) {
-    case 'clinic/post': {
+    case 'clinics/create': {
       // call createUser function
-      // eslint-disable-next-line no-console
       const newClinic = await clinic.createClinic(message.toString())
-      client.publish('gateway/clinic/post', JSON.stringify(newClinic))
+      client.publish('gateway/clinic/create', JSON.stringify(newClinic))
       break
     }
-    case 'clinic/get': {
+    case 'clinics/get': {
       // call getClinic function
-      // eslint-disable-next-line no-console
       const existingClinic = await clinic.getClinic(message.toString())
-      client.publish('gateway/clinic/get', JSON.stringify(existingClinic))
+      client.publish('gateway/clinics/get', JSON.stringify(existingClinic))
       break
     }
-    case 'clinic/getall':
-      // call getAllClinics function
-      break
-    case 'clinic/update': {
+    case 'clinics/update': {
       // call updateClinic function
-      // eslint-disable-next-line no-case-declarations
       const updatedClinic = await clinic.updateClinic(message.toString())
-      client.publish('gateway/clinic/delete', JSON.stringify(updatedClinic))
+      client.publish('gateway/clinics/update', JSON.stringify(updatedClinic))
       break
     }
-    case 'clinic/delete': {
+    case 'clinics/delete': {
       // call deleteClinic function
-      // eslint-disable-next-line no-case-declarations
       const deletedClinic = await clinic.deleteClinic(message.toString())
-      client.publish('gateway/clinic/delete', JSON.stringify(deletedClinic))
+      client.publish('gateway/clinics/delete', JSON.stringify(deletedClinic))
+      break
+    }
+    // Dentist Operations
+    case 'clinics/dentists/create': {
+      // call createUser function
+      const newDentist = await dentists.createDentist(message.toString())
+      client.publish(
+        'gateway/clinics/dentists/create',
+        JSON.stringify(newDentist)
+      )
+      break
+    }
+    case 'clinics/dentists/get': {
+      // call getClinic function
+      const dentist = message
+        ? await dentists.getDentist(message.toString())
+        : await dentists.getAllDentists()
+      client.publish('gateway/clinics/dentists/get', JSON.stringify(dentist))
+      break
+    }
+    case 'clinics/dentists/update': {
+      // call updateClinic function
+      const updatedDentist = await dentists.updateDentist(message.toString())
+      client.publish(
+        'gateway/clinics/dentists/update',
+        JSON.stringify(updatedDentist)
+      )
+      break
+    }
+    case 'clinics/dentists/delete': {
+      // call deleteClinic function
+      const deletedDentist = await dentists.deleteDentist(message.toString())
+      client.publish(
+        'gateway/clinics/dentists/delete',
+        JSON.stringify(deletedDentist)
+      )
       break
     }
   }

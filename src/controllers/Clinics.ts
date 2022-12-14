@@ -3,13 +3,9 @@ import Clinic from '../models/Clinic'
 // method that creates a new clinic if not already existing
 async function createClinic(message: string) {
   try {
-    // eslint-disable-next-line no-console
-    console.log(message)
     const clinicInfo = JSON.parse(message)
-    const { name, owner, dentists, address, city, coordinate, openinghours } = clinicInfo
-  
-    // eslint-disable-next-line no-console
-    if (!(name && owner && dentists && address && city && coordinate && openinghours))
+    const { name, owner, address, city, coordinate, openinghours } = clinicInfo
+    if (!(name && owner && address && city && coordinate && openinghours))
       return 'All input is required'
   
     // find existing clinic from DB
@@ -20,10 +16,7 @@ async function createClinic(message: string) {
       return 'Clinic already exists'
 
     // create new clinic
-    const clinic = new Clinic({ name, owner, dentists, address, city, coordinate, openinghours })
-
-    // eslint-disable-next-line no-console
-    console.log(clinic)
+    const clinic = new Clinic({ name, owner, address, city, coordinate, openinghours })
 
     // save new clinic to database
     clinic.save()
@@ -53,7 +46,7 @@ async function getClinic(message: string) {
     return existingClinic
 
   } catch (error) {
-    return 'Missing JSON file?'
+    return 'Missing Clinic Information'
   }
 }
 
@@ -73,15 +66,10 @@ async function deleteClinic(message: string) {
     if (id === null) {
       return 'Clinic does not exist'
     }
-  
-    // eslint-disable-next-line no-console
-    console.log(id)
     return 'Clinic has been deleted'
   } 
     
   catch (error) {
-    // eslint-disable-next-line no-console
-    console.log(error)
     return error
   }
 }
@@ -91,7 +79,7 @@ async function updateClinic(message: string) {
   try {
     const clinicInfo = JSON.parse(message)
     const id = clinicInfo
-    const clinic = await Clinic.findOneAndUpdate(id)
+    const clinic = await Clinic.findOneAndUpdate(id, {clinicInfo}, {new: true})
     
     if (!clinic) {
       return 'Invalid clinic ID'
@@ -101,14 +89,10 @@ async function updateClinic(message: string) {
       return 'Clinic does not exist'
     }
   
-    // eslint-disable-next-line no-console
-    console.log(clinic)
     return 'Clinic has been updated'
   } 
     
   catch (error) {
-    // eslint-disable-next-line no-console
-    console.log(error)
     return error
   }
 }
