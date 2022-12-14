@@ -86,19 +86,19 @@ async function getAllClinics() {
 async function deleteClinic(message: string) {
   try {
     const clinicInfo = JSON.parse(message);
-    const id = clinicInfo;
-    const clinic = await Clinic.findOneAndDelete(id);
+    const { id } = clinicInfo;
+    await Clinic.findByIdAndDelete(id);
 
-    if (!clinic) {
+    if (!id) {
       return "Invalid clinic ID";
     }
 
-    if (clinic === null) {
+    if (id === null) {
       return "Clinic does not exist";
     }
 
     // eslint-disable-next-line no-console
-    console.log(clinic);
+    console.log(id);
     return "Clinic has been deleted";
   } catch (error) {
     // eslint-disable-next-line no-console
