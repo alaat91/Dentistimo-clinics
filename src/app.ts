@@ -49,7 +49,9 @@ client.on('message', async (topic: string, message: Buffer) => {
     }
     case 'clinics/get': {
       // call getClinic function
-      const existingClinic = await clinic.getClinic(message.toString())
+      const existingClinic = message
+        ? await clinic.getClinic(message.toString())
+        : await clinic.getAllClinics()
       client.publish('gateway/clinics/get', JSON.stringify(existingClinic))
       break
     }

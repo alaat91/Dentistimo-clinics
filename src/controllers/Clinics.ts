@@ -37,12 +37,12 @@ async function createClinic(message: string) {
 async function getClinic(message: string) {
   try {
     const clinicInfo = JSON.parse(message)
-    const { id } = clinicInfo
+    const clinic = clinicInfo
 
-    if (!id) return 'ID is missing'
+    if (!clinic) return 'ID is missing'
 
     // find existing clinic from DB
-    const existingClinic = Clinic.findById(id)
+    const existingClinic = Clinic.findById(clinic)
 
     // check if clinic already exists
     if (existingClinic === null) return 'Clinic does not exist'
