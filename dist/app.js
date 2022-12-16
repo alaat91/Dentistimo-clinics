@@ -26,15 +26,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-// import mqtt from 'mqtt'
+const mqtt_1 = __importDefault(require("mqtt"));
 const dotenv = __importStar(require("dotenv"));
-//import clinic from './controllers/Clinics'
+const Clinics_1 = __importDefault(require("./controllers/Clinics"));
 const mongoose_1 = __importDefault(require("mongoose"));
+const Dentists_1 = __importDefault(require("./controllers/Dentists"));
+const Timeslots_1 = require("./controllers/Timeslots");
 //
 dotenv.config();
 // Variables
-const mongoURI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/clinicsDB';
-// const clinic = mqtt.connect(process.env.MQTT_URI || 'mqtt://localhost:1883')
+const mongoURI = process.env.MONGO_URI || 'mongodb://localhost:27017/clinics';
+const client = mqtt_1.default.connect(process.env.MQTT_URI || 'mqtt://localhost:1883');
 // Connect to MongoDB
 mongoose_1.default.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true }, (err) => {
     if (err) {
@@ -46,38 +48,67 @@ mongoose_1.default.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology
         console.log('Connected to MongoDB');
     }
 });
-/*
 client.on('connect', () => {
-  client.subscribe('auth/user/create')
-  client.subscribe('auth/user/login')
-  client.subscribe('auth/users/getall')
-  client.subscribe('auth/users/update')
-  client.subscribe('auth/user/delete')
-})
-
-client.on('message', async (topic: string, message:Buffer) => {
-  switch (topic) {
-    case 'auth/user/create': {
-      // call createUser function
-      const newUser = await user.createUser(message.toString())
-      client.publish('gateway/user/create', JSON.stringify(newUser))
-      break
+    client.subscribe('clinics/#');
+});
+client.on('message', async (topic, message) => {
+    switch (topic) {
+        case 'clinics/slots/available': {
+            const { clinic, start, end, responseTopic } = JSON.parse(message.toString());
+            const availableSlots = await (0, Timeslots_1.getTimeSlots)(clinic, start, end);
+            client.publish(responseTopic, JSON.stringify(availableSlots));
+            break;
+        }
+        case 'clinics/create': {
+            // call createUser function
+            const newClinic = await Clinics_1.default.createClinic(message.toString());
+            client.publish('gateway/clinic/create', JSON.stringify(newClinic));
+            break;
+        }
+        case 'clinics/get': {
+            // call getClinic function
+            const existingClinic = await Clinics_1.default.getClinic(message.toString());
+            client.publish('gateway/clinics/get', JSON.stringify(existingClinic));
+            break;
+        }
+        case 'clinics/update': {
+            // call updateClinic function
+            const updatedClinic = await Clinics_1.default.updateClinic(message.toString());
+            client.publish('gateway/clinics/update', JSON.stringify(updatedClinic));
+            break;
+        }
+        case 'clinics/delete': {
+            // call deleteClinic function
+            const deletedClinic = await Clinics_1.default.deleteClinic(message.toString());
+            client.publish('gateway/clinics/delete', JSON.stringify(deletedClinic));
+            break;
+        }
+        // Dentist Operations
+        case 'clinics/dentists/create': {
+            // call createUser function
+            const newDentist = await Dentists_1.default.createDentist(message.toString());
+            client.publish('gateway/clinics/dentists/create', JSON.stringify(newDentist));
+            break;
+        }
+        case 'clinics/dentists/get': {
+            // call getClinic function
+            const dentist = message
+                ? await Dentists_1.default.getDentist(message.toString())
+                : await Dentists_1.default.getAllDentists();
+            client.publish('gateway/clinics/dentists/get', JSON.stringify(dentist));
+            break;
+        }
+        case 'clinics/dentists/update': {
+            // call updateClinic function
+            const updatedDentist = await Dentists_1.default.updateDentist(message.toString());
+            client.publish('gateway/clinics/dentists/update', JSON.stringify(updatedDentist));
+            break;
+        }
+        case 'clinics/dentists/delete': {
+            // call deleteClinic function
+            const deletedDentist = await Dentists_1.default.deleteDentist(message.toString());
+            client.publish('gateway/clinics/dentists/delete', JSON.stringify(deletedDentist));
+            break;
+        }
     }
-    case 'auth/user/login': {
-      // call loginUser function
-      const loggedIn = await user.login(message.toString())
-      client.publish('gateway/user/login', JSON.stringify(loggedIn))
-      break
-    }
-    case 'auth/users/all':
-      // call getAllUsers function
-      break
-    case 'auth/user/update':
-      // call updateUser function
-      break
-    case 'auth/user/delete':
-      // call deleteUser function
-      break
-  }
-})
-*/
+});

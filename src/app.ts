@@ -3,6 +3,7 @@ import * as dotenv from 'dotenv'
 import clinic from './controllers/Clinics'
 import mongoose, { ConnectOptions } from 'mongoose'
 import dentists from './controllers/Dentists'
+import { getTimeSlots } from './controllers/Timeslots'
 
 //
 dotenv.config()
@@ -32,6 +33,12 @@ client.on('connect', () => {
 
 client.on('message', async (topic: string, message: Buffer) => {
   switch (topic) {
+    case 'clinics/slots/available': {
+      const {clinic, start, end, responseTopic} = JSON.parse(message.toString())
+      const availableSlots = await getTimeSlots(clinic, start, end)
+      client.publish(responseTopic, JSON.stringify(availableSlots))
+      break
+    }
     case 'clinics/create': {
       // call createUser function
       const newClinic = await clinic.createClinic(message.toString())

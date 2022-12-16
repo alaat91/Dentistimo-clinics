@@ -4,23 +4,28 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
+const Dentist_1 = __importDefault(require("./Dentist"));
 // Define clinic schema
 const clinicSchema = new mongoose_1.default.Schema({
     name: { type: String, required: true },
     owner: { type: String, required: true },
-    dentists: { type: Number, required: true },
-    adress: { type: String, required: true },
-    coordinates: [{
-            longitude: { type: String, required: true },
-            latitude: { type: String, required: true }
-        }],
-    openingHours: [{
-            Monday: { type: String, required: true },
-            Tuesday: { type: String, required: true },
-            Wednesday: { type: String, required: true },
-            Thursday: { type: String, required: true },
-            Friday: { type: String, required: true }
-        }]
+    address: { type: String, required: true },
+    city: { type: String, required: true },
+    coordinate: {
+        longitude: { type: String, required: true },
+        latitude: { type: String, required: true },
+    },
+    openinghours: {
+        monday: { type: String, required: true },
+        tuesday: { type: String, required: true },
+        wednesday: { type: String, required: true },
+        thursday: { type: String, required: true },
+        friday: { type: String, required: true },
+    },
+}, { timestamps: true, toJSON: { virtuals: true } });
+// add virtual dentists
+clinicSchema.virtual('dentists').get(function () {
+    return Dentist_1.default.count({ clinic: this._id });
 });
 // Export Clinic
 exports.default = mongoose_1.default.model('clinic', clinicSchema);
