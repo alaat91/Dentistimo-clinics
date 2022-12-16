@@ -34,7 +34,9 @@ client.on('connect', () => {
 client.on('message', async (topic: string, message: Buffer) => {
   switch (topic) {
     case 'clinics/slots/available': {
-      const {clinic, start, end, responseTopic} = JSON.parse(message.toString())
+      const { clinic, start, end, responseTopic } = JSON.parse(
+        message.toString()
+      )
       const availableSlots = await getTimeSlots(clinic, start, end)
       client.publish(responseTopic, JSON.stringify(availableSlots))
       break
