@@ -100,7 +100,7 @@ export const getTimeSlots = async (
           )
             continue
           slots.push({
-            dentist: dentist._id,
+            dentist: dentist._id.toString(),
             clinic: currentClinic._id.toString(),
             start: slot.getTime(),
             end: slot.getTime() + THIRTY_MINUTES_MS,

@@ -1,6 +1,7 @@
 import { HydratedDocument } from 'mongoose'
 import Dentist from '../models/Dentist'
 import { IDentist } from '../types/IDentist'
+import { MQTTErrorException } from '../util/errors/MQTTErrorException'
 
 /**  Create a new Dentist */
 const createDentist = async (message: string) => {

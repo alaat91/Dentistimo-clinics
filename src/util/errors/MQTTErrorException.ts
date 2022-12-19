@@ -1,4 +1,4 @@
-class MQTTErrorException extends Error {
+export class MQTTErrorException extends Error {
   code: number
   constructor({ code, message }: { code: number; message: string }) {
     super(message)

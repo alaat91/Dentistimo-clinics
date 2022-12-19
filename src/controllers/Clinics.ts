@@ -2,6 +2,7 @@
 import { HydratedDocument } from 'mongoose'
 import Clinic from '../models/Clinic'
 import { IClinic } from '../types/IClinic'
+import { MQTTErrorException } from '../util/errors/MQTTErrorException'
 
 // method that creates a new clinic if not already existing
 async function createClinic(message: string) {
