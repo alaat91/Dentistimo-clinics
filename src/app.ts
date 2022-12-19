@@ -32,6 +32,7 @@ client.on('connect', () => {
 })
 
 client.on('message', async (topic: string, message: Buffer) => {
+  const parsedMessage = JSON.parse(message.toString())
   switch (topic) {
     case 'clinics/slots/available': {
       const { clinic, start, end, responseTopic } = JSON.parse(
@@ -48,11 +49,13 @@ client.on('message', async (topic: string, message: Buffer) => {
       break
     }
     case 'clinics/get': {
-      const noMessage = message.toString() === '' || !message
-      const response = noMessage
-        ? await clinic.getAllClinics()
-        : await clinic.getClinic(message.toString())
-      client.publish('gateway/clinics/get', JSON.stringify(response))
+      const response = await clinic.getClinic(message.toString())
+      client.publish(parsedMessage.responseTopic, JSON.stringify(response))
+      break
+    }
+    case 'clinics/get/all': {
+      const response = await clinic.getAllClinics()
+      client.publish(parsedMessage.responseTopic, JSON.stringify(response))
       break
     }
     case 'clinics/update': {
