@@ -3,7 +3,7 @@ import { IDentist } from '../types/IDentist'
 
 const Schema = mongoose.Schema
 
-const dentistSchema = new Schema({
+const dentistSchema = new Schema<IDentist>({
   name: { type: String, required: true },
   clinic: { type: Schema.Types.ObjectId, ref: 'clinic', required: true },
   lunchBreak: { type: String, required: true },

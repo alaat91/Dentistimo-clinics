@@ -1,13 +1,18 @@
-import mongoose, { Document } from 'mongoose'
-
-export interface IClinic extends Document {
-  _id: mongoose.Types.ObjectId
+export interface IClinic {
   name: string
   owner: string
   dentists: number
-  adress: string
-  coordinates: string
+  address: string
+  city: string
+  coordinate: {
+    longitude: string
+    latitude: string
+  }
   openinghours: {
-    [key: string]: string
+    monday: string
+    tuesday: string
+    wednesday: string
+    thursday: string
+    friday: string
   }
 }

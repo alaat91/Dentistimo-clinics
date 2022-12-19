@@ -1,5 +1,8 @@
 /* eslint-disable semi */
+import { HydratedDocument } from 'mongoose'
 import Clinic from '../models/Clinic'
+import { IClinic } from '../types/IClinic'
+import { MQTTErrorException } from '../util/errors/MQTTErrorException'
 
 // method that creates a new clinic if not already existing
 async function createClinic(message: string) {
@@ -26,8 +29,8 @@ async function createClinic(message: string) {
     })
 
     // save new clinic to database
-    clinic.save()
-    return 'Clinic has been created and saved to database'
+    const newClinic = await clinic.save()
+    return newClinic
   } catch (error) {
     return 'Something is wrong with the JSON data'
   }
@@ -37,26 +40,37 @@ async function createClinic(message: string) {
 async function getClinic(message: string) {
   try {
     const clinicInfo = JSON.parse(message)
-    const { id } = clinicInfo
-
-    if (!id) return 'ID is missing'
-
-    // find existing clinic from DB
-    const existingClinic = Clinic.findById(id)
-
-    // check if clinic already exists
-    if (existingClinic === null) return 'Clinic does not exist'
-
-    return existingClinic
+    const { clinic } = clinicInfo
+    const currentClinic: HydratedDocument<IClinic> | null =
+      await Clinic.findById(clinic)
+    if (!currentClinic)
+      throw new MQTTErrorException({
+        code: 400,
+        message: 'Clinic does not exist',
+      })
+    return currentClinic
   } catch (error) {
-    return 'Missing Clinic Information'
+    if (error instanceof MQTTErrorException) {
+      return {
+        error: {
+          code: error.code,
+          message: error.message,
+        },
+      }
+    }
+    return {
+      error: {
+        code: 500,
+        message: (error as Error).message,
+      },
+    }
   }
 }
 
 // TODO getAllClinics
 async function getAllClinics() {
   try {
-    const allClinics = await Clinic.find()
+    const allClinics: HydratedDocument<IClinic>[] = await Clinic.find({})
     return allClinics
   } catch (error) {
     return error
@@ -74,9 +88,6 @@ async function deleteClinic(message: string) {
       return 'Invalid clinic ID'
     }
 
-    if (id === null) {
-      return 'Clinic does not exist'
-    }
     return 'Clinic has been deleted'
   } catch (error) {
     return error
@@ -94,15 +105,7 @@ async function updateClinic(message: string) {
       { new: true }
     )
 
-    if (!clinic) {
-      return 'Invalid clinic ID'
-    }
-
-    if (clinic === null) {
-      return 'Clinic does not exist'
-    }
-
-    return 'Clinic has been updated'
+    return clinic
   } catch (error) {
     return error
   }

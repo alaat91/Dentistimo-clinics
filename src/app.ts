@@ -32,6 +32,7 @@ client.on('connect', () => {
 })
 
 client.on('message', async (topic: string, message: Buffer) => {
+  const parsedMessage = JSON.parse(message.toString())
   switch (topic) {
     case 'clinics/slots/available': {
       const { clinic, start, end, responseTopic } = JSON.parse(
@@ -48,9 +49,13 @@ client.on('message', async (topic: string, message: Buffer) => {
       break
     }
     case 'clinics/get': {
-      // call getClinic function
-      const existingClinic = await clinic.getClinic(message.toString())
-      client.publish('gateway/clinics/get', JSON.stringify(existingClinic))
+      const response = await clinic.getClinic(message.toString())
+      client.publish(parsedMessage.responseTopic, JSON.stringify(response))
+      break
+    }
+    case 'clinics/get/all': {
+      const response = await clinic.getAllClinics()
+      client.publish(parsedMessage.responseTopic, JSON.stringify(response))
       break
     }
     case 'clinics/update': {
@@ -77,9 +82,10 @@ client.on('message', async (topic: string, message: Buffer) => {
     }
     case 'clinics/dentists/get': {
       // call getClinic function
-      const dentist = message
-        ? await dentists.getDentist(message.toString())
-        : await dentists.getAllDentists()
+      const noMessage = message.toString() === '' || !message
+      const dentist = noMessage
+        ? await dentists.getAllDentists()
+        : await dentists.getDentist(message.toString())
       client.publish('gateway/clinics/dentists/get', JSON.stringify(dentist))
       break
     }
