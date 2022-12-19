@@ -55,7 +55,10 @@ export const getTimeSlots = async (
         .toLocaleDateString('default', { weekday: 'long' })
         .toLowerCase()
       if (day === 'saturday' || day === 'sunday') continue
-      const openinghours = currentClinic.openinghours[day]
+      const openinghours =
+        currentClinic.openinghours[
+          day as keyof typeof currentClinic.openinghours
+        ]
       // set current date to clinic open time
       parseTimeString(openinghours.split('-')[0], date)
       // turn closing time to a date object

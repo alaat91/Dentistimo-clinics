@@ -1,9 +1,8 @@
 import mongoose from 'mongoose'
 import { IClinic } from '../types/IClinic'
-import Dentist from './Dentist'
 
 // Define clinic schema
-const clinicSchema = new mongoose.Schema(
+const clinicSchema = new mongoose.Schema<IClinic>(
   {
     name: { type: String, required: true },
     owner: { type: String, required: true },
@@ -24,9 +23,7 @@ const clinicSchema = new mongoose.Schema(
   { timestamps: true, toJSON: { virtuals: true } }
 )
 
-// add virtual dentists
-clinicSchema.virtual('dentists').get(function () {
-  return Dentist.count({ clinic: this._id })
-})
+// TODO: add dentist virtual
+
 // Export Clinic
 export default mongoose.model<IClinic>('clinic', clinicSchema)

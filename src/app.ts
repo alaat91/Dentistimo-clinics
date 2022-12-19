@@ -48,11 +48,11 @@ client.on('message', async (topic: string, message: Buffer) => {
       break
     }
     case 'clinics/get': {
-      // call getClinic function
-      const existingClinic = message
-        ? await clinic.getClinic(message.toString())
-        : await clinic.getAllClinics()
-      client.publish('gateway/clinics/get', JSON.stringify(existingClinic))
+      const noMessage = message.toString() === '' || !message
+      const response = noMessage
+        ? await clinic.getAllClinics()
+        : await clinic.getClinic(message.toString())
+      client.publish('gateway/clinics/get', JSON.stringify(response))
       break
     }
     case 'clinics/update': {
@@ -79,9 +79,10 @@ client.on('message', async (topic: string, message: Buffer) => {
     }
     case 'clinics/dentists/get': {
       // call getClinic function
-      const dentist = message
-        ? await dentists.getDentist(message.toString())
-        : await dentists.getAllDentists()
+      const noMessage = message.toString() === '' || !message
+      const dentist = noMessage
+        ? await dentists.getAllDentists()
+        : await dentists.getDentist(message.toString())
       client.publish('gateway/clinics/dentists/get', JSON.stringify(dentist))
       break
     }
