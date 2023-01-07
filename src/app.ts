@@ -3,7 +3,7 @@ import * as dotenv from 'dotenv'
 import clinic from './controllers/Clinics'
 import mongoose, { ConnectOptions } from 'mongoose'
 import dentists from './controllers/Dentists'
-import { getTimeSlots } from './controllers/Timeslots'
+import { getTimeSlots, verifySlot } from './controllers/Timeslots'
 
 //
 dotenv.config()
@@ -41,6 +41,12 @@ client.on('message', async (topic: string, message: Buffer) => {
         message.toString()
       )
       const availableSlots = await getTimeSlots(clinic, start, end)
+      client.publish(responseTopic, JSON.stringify(availableSlots))
+      break
+    }
+    case 'clinics/slots/verify': {
+      const { start, dentist, responseTopic } = JSON.parse(message.toString())
+      const availableSlots = await verifySlot(start, dentist)
       client.publish(responseTopic, JSON.stringify(availableSlots))
       break
     }

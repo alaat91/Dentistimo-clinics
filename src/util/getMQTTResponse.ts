@@ -1,7 +1,7 @@
 import { QoS } from 'mqtt'
-import { client } from '../../app'
-import { MQTTResponse } from '../../types/MQTTResponse'
-import { PublishMessage } from '../../types/PublishMessage'
+import { client } from '../app'
+import { MQTTResponse } from '../types/MQTTResponse'
+import { PublishMessage } from '../types/PublishMessage'
 import { v4 as uuidv4 } from 'uuid'
 
 /**
