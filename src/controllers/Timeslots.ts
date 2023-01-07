@@ -1,6 +1,8 @@
 import Clinic from '../models/Clinic'
 import Dentist from '../models/Dentist'
+import { IBooking } from '../types/IBooking'
 import { ITimeSlot } from '../types/ITimeSlot'
+import { getMQTTResponse } from '../util/errors/getMQTTResponse'
 
 /**
  * Generate 30 minute time slots for a given date range, for a given clinic
@@ -47,8 +49,11 @@ export const getTimeSlots = async (
         },
       }
     }
+    // get all bookings within the interval
+    // const bookings = await getMQTTResponse('bookings/get/range', 'clinics/bookings', {start, end}) as IBooking[]
+    // console.log(bookings)
 
-    const slots: ITimeSlot[] = []
+    const slots: Map<number, ITimeSlot> = new Map<number, ITimeSlot>()
     for (let i = startDate.getTime(); i <= endDate.getTime(); i += DAY_MS) {
       const date = new Date(i)
       const day = date
@@ -62,8 +67,10 @@ export const getTimeSlots = async (
       // set current date to clinic open time
       parseTimeString(openinghours.split('-')[0], date)
       // turn closing time to a date object
-      const clinicCloseDate = parseTimeString(openinghours.split('-')[1])
-
+      const clinicCloseDate = parseTimeString(
+        openinghours.split('-')[1],
+        new Date(i)
+      )
       // create slots for each dentist
       dentists.forEach((dentist) => {
         const lunchBreakStart = parseTimeString(
@@ -99,7 +106,7 @@ export const getTimeSlots = async (
             slot.getTime() + THIRTY_MINUTES_MS <= fikaBreakEnd.getTime()
           )
             continue
-          slots.push({
+          slots.set(slot.getTime(), {
             dentist: dentist._id.toString(),
             clinic: currentClinic._id.toString(),
             start: slot.getTime(),
@@ -109,7 +116,7 @@ export const getTimeSlots = async (
       })
     }
 
-    return slots
+    return Array.from(slots.values())
   } catch (error) {
     return {
       error: {
