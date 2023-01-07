@@ -82,15 +82,30 @@ async function deleteClinic(message: string) {
   try {
     const clinicInfo = JSON.parse(message)
     const { id } = clinicInfo
-    await Clinic.findByIdAndDelete(id)
+    const deletedClinic = await Clinic.findByIdAndDelete(id)
 
     if (!id) {
-      return 'Invalid clinic ID'
+      throw new MQTTErrorException({
+        code: 400,
+        message: 'Invalid Id',
+      })
     }
-
-    return 'Clinic has been deleted'
+    return deletedClinic
   } catch (error) {
-    return error
+    if (error instanceof MQTTErrorException) {
+      return {
+        error: {
+          code: error.code,
+          message: error.message,
+        },
+      }
+    }
+    return {
+      error: {
+        code: 500,
+        message: (error as Error).message,
+      },
+    }
   }
 }
 

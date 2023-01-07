@@ -52,7 +52,7 @@ export const getTimeSlots = async (
     for (let i = startDate.getTime(); i <= endDate.getTime(); i += DAY_MS) {
       const date = new Date(i)
       const day = date
-        .toLocaleDateString('default', { weekday: 'long' })
+        .toLocaleDateString('EN-US', { weekday: 'long' })
         .toLowerCase()
       if (day === 'saturday' || day === 'sunday') continue
       const openinghours =
