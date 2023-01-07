@@ -50,8 +50,11 @@ export const getTimeSlots = async (
       }
     }
     // get all bookings within the interval
-    // const bookings = await getMQTTResponse('bookings/get/range', 'clinics/bookings', {start, end}) as IBooking[]
-    // console.log(bookings)
+    const bookings = (await getMQTTResponse(
+      'bookings/get/range',
+      'clinics/bookings',
+      { start, end }
+    )) as IBooking[]
 
     const slots: Map<number, ITimeSlot> = new Map<number, ITimeSlot>()
     for (let i = startDate.getTime(); i <= endDate.getTime(); i += DAY_MS) {
@@ -106,6 +109,13 @@ export const getTimeSlots = async (
             slot.getTime() + THIRTY_MINUTES_MS <= fikaBreakEnd.getTime()
           )
             continue
+          // skip slot if it is already booked
+          const booked = bookings.some(
+            (booking) =>
+              booking.date === slot.getTime() &&
+              booking.dentist_id === dentist._id.toString()
+          )
+          if (booked) continue
           slots.set(slot.getTime(), {
             dentist: dentist._id.toString(),
             clinic: currentClinic._id.toString(),
