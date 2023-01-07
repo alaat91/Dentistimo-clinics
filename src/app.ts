@@ -3,14 +3,16 @@ import * as dotenv from 'dotenv'
 import clinic from './controllers/Clinics'
 import mongoose, { ConnectOptions } from 'mongoose'
 import dentists from './controllers/Dentists'
-import { getTimeSlots } from './controllers/Timeslots'
+import { getTimeSlots, verifySlot } from './controllers/Timeslots'
 
 //
 dotenv.config()
 
 // Variables
 const mongoURI = process.env.MONGO_URI || 'mongodb://localhost:27017/clinics'
-const client = mqtt.connect(process.env.MQTT_URI || 'mqtt://localhost:1883')
+export const client = mqtt.connect(
+  process.env.MQTT_URI || 'mqtt://localhost:1883'
+)
 
 // Connect to MongoDB
 mongoose.connect(
@@ -42,6 +44,12 @@ client.on('message', async (topic: string, message: Buffer) => {
       client.publish(responseTopic, JSON.stringify(availableSlots))
       break
     }
+    case 'clinics/slots/verify': {
+      const { start, dentist, responseTopic } = JSON.parse(message.toString())
+      const availableSlots = await verifySlot(start, dentist)
+      client.publish(responseTopic, JSON.stringify(availableSlots))
+      break
+    }
     case 'clinics/create': {
       // call createUser function
       const newClinic = await clinic.createClinic(message.toString())
@@ -61,23 +69,20 @@ client.on('message', async (topic: string, message: Buffer) => {
     case 'clinics/update': {
       // call updateClinic function
       const updatedClinic = await clinic.updateClinic(message.toString())
-      client.publish('gateway/clinics/update', JSON.stringify(updatedClinic))
+      client.publish(parsedMessage.responseTopic, JSON.stringify(updatedClinic))
       break
     }
     case 'clinics/delete': {
       // call deleteClinic function
       const deletedClinic = await clinic.deleteClinic(message.toString())
-      client.publish('gateway/clinics/delete', JSON.stringify(deletedClinic))
+      client.publish(parsedMessage.responseTopic, JSON.stringify(deletedClinic))
       break
     }
     // Dentist Operations
     case 'clinics/dentists/create': {
       // call createUser function
       const newDentist = await dentists.createDentist(message.toString())
-      client.publish(
-        'gateway/clinics/dentists/create',
-        JSON.stringify(newDentist)
-      )
+      client.publish(parsedMessage.responseTopic, JSON.stringify(newDentist))
       break
     }
     case 'clinics/dentists/get': {
@@ -86,14 +91,14 @@ client.on('message', async (topic: string, message: Buffer) => {
       const dentist = noMessage
         ? await dentists.getAllDentists()
         : await dentists.getDentist(message.toString())
-      client.publish('gateway/clinics/dentists/get', JSON.stringify(dentist))
+      client.publish(parsedMessage.responseTopic, JSON.stringify(dentist))
       break
     }
     case 'clinics/dentists/update': {
       // call updateClinic function
       const updatedDentist = await dentists.updateDentist(message.toString())
       client.publish(
-        'gateway/clinics/dentists/update',
+        parsedMessage.responseTopic,
         JSON.stringify(updatedDentist)
       )
       break
@@ -102,7 +107,7 @@ client.on('message', async (topic: string, message: Buffer) => {
       // call deleteClinic function
       const deletedDentist = await dentists.deleteDentist(message.toString())
       client.publish(
-        'gateway/clinics/dentists/delete',
+        parsedMessage.responseTopic,
         JSON.stringify(deletedDentist)
       )
       break
