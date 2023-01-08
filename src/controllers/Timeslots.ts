@@ -13,12 +13,15 @@ import { getMQTTResponse } from '../util/getMQTTResponse'
  */
 export const getTimeSlots = async (
   clinic: string,
-  start: number,
-  end: number
+  startTime: number,
+  endTime: number
 ) => {
   try {
     const currentClinic = await Clinic.findById(clinic)
     const dentists = await Dentist.find({ clinic })
+
+    const start = resetTime(startTime)
+    const end = resetTime(endTime)
 
     const startDate = new Date(start)
     const endDate = new Date(end)
@@ -160,14 +163,23 @@ const parseTimeString = (time: string, date?: Date): Date => {
   }
 }
 
+const resetTime = (timestamp: number): number => {
+  const date = new Date(timestamp)
+  date.setHours(0, 0, 0, 0)
+  date.setSeconds(0)
+  date.setMilliseconds(0)
+  return date.getTime()
+}
+
 /** A helper function for validating whether a slot is valid to be booked */
 // make sure that a slot is valid
 // this includes checking if the slot is already booked
 // checking if the slot is on the half hour
 // checking if the slot is within the clinics opening hours and days
 // checking if the slot is outside of dentists breaks
-export const verifySlot = async (start: number, dentist_id: string) => {
+export const verifySlot = async (startTime: number, dentist_id: string) => {
   try {
+    const start = resetTime(startTime)
     const THIRTY_MINUTES_MS = 1800000
     const end = start + THIRTY_MINUTES_MS
     if (start < Date.now()) return false
