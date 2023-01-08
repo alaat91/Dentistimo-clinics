@@ -164,83 +164,87 @@ const parseTimeString = (time: string, date?: Date): Date => {
 // checking if the slot is within the clinics opening hours and days
 // checking if the slot is outside of dentists breaks
 export const verifySlot = async (start: number, dentist_id: string) => {
-  const THIRTY_MINUTES_MS = 1800000
-  const end = start + THIRTY_MINUTES_MS
-  const dentist = await Dentist.findById(dentist_id)
-  if (!dentist) return false
-  // get all bookings within the interval
-  const bookings = (await getMQTTResponse(
-    'bookings/get/range',
-    'clinics/bookings',
-    { start, end, clinic: dentist.clinic.toString() }
-  )) as IBooking[]
-  // check if the slot is already booked
-  const booked = bookings.some(
-    (booking) => booking.date === start && booking.dentist_id === dentist_id
-  )
-  if (booked) return false
-  // check if the slot is on the half hour
-  const startDate = new Date(start)
-  const endDate = new Date(end)
-  if (startDate.getMinutes() % 30 !== 0) return false
+  try {
+    const THIRTY_MINUTES_MS = 1800000
+    const end = start + THIRTY_MINUTES_MS
+    const dentist = await Dentist.findById(dentist_id)
+    if (!dentist) return false
+    // get all bookings within the interval
+    const bookings = (await getMQTTResponse(
+      'bookings/get/range',
+      'clinics/bookings',
+      { start, end, clinic: dentist.clinic.toString() }
+    )) as IBooking[]
+    // check if the slot is already booked
+    const booked = bookings.some(
+      (booking) => booking.date === start && booking.dentist_id === dentist_id
+    )
+    if (booked) return false
+    // check if the slot is on the half hour
+    const startDate = new Date(start)
+    const endDate = new Date(end)
+    if (startDate.getMinutes() % 30 !== 0) return false
 
-  // check if the slot is within the clinics opening hours and days
-  const clinic = await Clinic.findById(dentist.clinic)
-  if (!clinic) return false
-  const day = startDate
-    .toLocaleDateString('en-US', { weekday: 'long' })
-    .toLowerCase()
-  if (day === 'saturday' || day === 'sunday') return false
-  const openinghours =
-    clinic.openinghours[day as keyof typeof clinic.openinghours]
-  const clinicOpenDate = parseTimeString(
-    openinghours.split('-')[0],
-    new Date(start)
-  )
-  const clinicCloseDate = parseTimeString(
-    openinghours.split('-')[1],
-    new Date(start)
-  )
-  if (startDate.getTime() < clinicOpenDate.getTime()) return false
-  if (startDate.getTime() > clinicCloseDate.getTime()) return false
+    // check if the slot is within the clinics opening hours and days
+    const clinic = await Clinic.findById(dentist.clinic)
+    if (!clinic) return false
+    const day = startDate
+      .toLocaleDateString('en-US', { weekday: 'long' })
+      .toLowerCase()
+    if (day === 'saturday' || day === 'sunday') return false
+    const openinghours =
+      clinic.openinghours[day as keyof typeof clinic.openinghours]
+    const clinicOpenDate = parseTimeString(
+      openinghours.split('-')[0],
+      new Date(start)
+    )
+    const clinicCloseDate = parseTimeString(
+      openinghours.split('-')[1],
+      new Date(start)
+    )
+    if (startDate.getTime() < clinicOpenDate.getTime()) return false
+    if (startDate.getTime() > clinicCloseDate.getTime()) return false
 
-  // check if the slot start or end falls within the lunch break
-  const lunchBreakStart = parseTimeString(
-    dentist.lunchBreak.split('-')[0],
-    new Date(start)
-  )
-  const lunchBreakEnd = parseTimeString(
-    dentist.lunchBreak.split('-')[1],
-    new Date(start)
-  )
-  if (
-    startDate.getTime() >= lunchBreakStart.getTime() &&
-    startDate.getTime() <= lunchBreakEnd.getTime()
-  )
+    // check if the slot start or end falls within the lunch break
+    const lunchBreakStart = parseTimeString(
+      dentist.lunchBreak.split('-')[0],
+      new Date(start)
+    )
+    const lunchBreakEnd = parseTimeString(
+      dentist.lunchBreak.split('-')[1],
+      new Date(start)
+    )
+    if (
+      startDate.getTime() >= lunchBreakStart.getTime() &&
+      startDate.getTime() <= lunchBreakEnd.getTime()
+    )
+      return false
+    if (
+      endDate.getTime() >= lunchBreakStart.getTime() &&
+      endDate.getTime() <= lunchBreakEnd.getTime()
+    )
+      return false
+    // check if the slot start or end falls within the fika break
+    const fikaBreakStart = parseTimeString(
+      dentist.fikaBreak.split('-')[0],
+      new Date(start)
+    )
+    const fikaBreakEnd = parseTimeString(
+      dentist.fikaBreak.split('-')[1],
+      new Date(start)
+    )
+    if (
+      startDate.getTime() >= fikaBreakStart.getTime() &&
+      startDate.getTime() <= fikaBreakEnd.getTime()
+    )
+      return false
+    if (
+      endDate.getTime() >= fikaBreakStart.getTime() &&
+      endDate.getTime() <= fikaBreakEnd.getTime()
+    )
+      return false
+    return true
+  } catch (error) {
     return false
-  if (
-    endDate.getTime() >= lunchBreakStart.getTime() &&
-    endDate.getTime() <= lunchBreakEnd.getTime()
-  )
-    return false
-  // check if the slot start or end falls within the fika break
-  const fikaBreakStart = parseTimeString(
-    dentist.fikaBreak.split('-')[0],
-    new Date(start)
-  )
-  const fikaBreakEnd = parseTimeString(
-    dentist.fikaBreak.split('-')[1],
-    new Date(start)
-  )
-  if (
-    startDate.getTime() >= fikaBreakStart.getTime() &&
-    startDate.getTime() <= fikaBreakEnd.getTime()
-  )
-    return false
-  if (
-    endDate.getTime() >= fikaBreakStart.getTime() &&
-    endDate.getTime() <= fikaBreakEnd.getTime()
-  )
-    return false
-  return true
+  }
 }

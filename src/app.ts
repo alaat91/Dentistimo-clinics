@@ -87,11 +87,13 @@ client.on('message', async (topic: string, message: Buffer) => {
     }
     case 'clinics/dentists/get': {
       // call getClinic function
-      const noMessage = message.toString() === '' || !message
-      const dentist = noMessage
-        ? await dentists.getAllDentists()
-        : await dentists.getDentist(message.toString())
+      const dentist = await dentists.getDentist(message.toString())
       client.publish(parsedMessage.responseTopic, JSON.stringify(dentist))
+      break
+    }
+    case 'clinics/dentists/get/all': {
+      const allDentists = await dentists.getAllDentists()
+      client.publish(parsedMessage.responseTopic, JSON.stringify(allDentists))
       break
     }
     case 'clinics/dentists/update': {

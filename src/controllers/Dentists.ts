@@ -25,7 +25,7 @@ const createDentist = async (message: string) => {
 /** Get all dentists from the databse */
 const getAllDentists = async () => {
   try {
-    const dentists = await Dentist.find()
+    const dentists = await Dentist.find().populate('clinic')
     return dentists
   } catch (error) {
     return {
@@ -41,7 +41,7 @@ const getDentistsForClinic = async (message: string) => {
     const { clinic } = JSON.parse(message)
     const dentists: HydratedDocument<IDentist>[] = await Dentist.find({
       clinic,
-    })
+    }).populate('clinic')
     return dentists
   } catch (error) {
     return {
@@ -57,7 +57,7 @@ const getDentist = async (message: string) => {
     const { id } = JSON.parse(message)
     const dentist: HydratedDocument<IDentist> | null = await Dentist.findById(
       id
-    )
+    ).populate('clinic')
     if (!dentist)
       throw new MQTTErrorException({
         code: 400,
