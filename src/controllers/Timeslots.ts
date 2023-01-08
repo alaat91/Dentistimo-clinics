@@ -59,8 +59,6 @@ export const getTimeSlots = async (
       { start, end }
     )) as IBooking[]
 
-    console.log(bookings)
-
     const slots: Map<number, ITimeSlot> = new Map<number, ITimeSlot>()
     for (let i = startDate.getTime(); i <= endDate.getTime(); i += DAY_MS) {
       const date = new Date(i)
