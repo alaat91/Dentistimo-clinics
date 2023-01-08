@@ -88,6 +88,9 @@ export const getTimeSlots = async (
           j += THIRTY_MINUTES_MS
         ) {
           const slot = new Date(j)
+          // skip slot if the time has elapsed
+          if (slot.getTime() < Date.now()) continue
+          if (slot.getTime() + THIRTY_MINUTES_MS < Date.now()) continue
           // skip slot if it is during lunch break or fika break
           if (
             slot.getTime() >= lunchBreakStart.getTime() &&
@@ -167,6 +170,7 @@ export const verifySlot = async (start: number, dentist_id: string) => {
   try {
     const THIRTY_MINUTES_MS = 1800000
     const end = start + THIRTY_MINUTES_MS
+    if (start < Date.now()) return false
     const dentist = await Dentist.findById(dentist_id)
     if (!dentist) return false
     // get all bookings within the interval
