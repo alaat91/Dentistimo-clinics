@@ -4,6 +4,7 @@ import clinic from './controllers/Clinics'
 import mongoose, { ConnectOptions } from 'mongoose'
 import dentists from './controllers/Dentists'
 import { getTimeSlots, verifySlot } from './controllers/Timeslots'
+import { preloadData } from './util/autoinject/injector'
 
 //
 dotenv.config()
@@ -18,11 +19,12 @@ export const client = mqtt.connect(
 mongoose.connect(
   mongoURI,
   { useNewUrlParser: true, useUnifiedTopology: true } as ConnectOptions,
-  (err) => {
+  async (err) => {
     if (err) {
       // eslint-disable-next-line no-console
       console.error(err)
     } else if (process.env.NODE_ENV !== 'production') {
+      await preloadData()
       // eslint-disable-next-line no-console
       console.log('Connected to MongoDB')
     }
