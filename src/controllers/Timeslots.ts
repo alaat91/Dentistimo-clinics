@@ -20,8 +20,8 @@ export const getTimeSlots = async (
     const currentClinic = await Clinic.findById(clinic)
     const dentists = await Dentist.find({ clinic })
 
-    const start = resetTime(startTime)
-    const end = resetTime(endTime)
+    const start = new Date(startTime).setUTCHours(0, 0, 0, 0)
+    const end = new Date(endTime).setUTCHours(23, 59, 59, 999)
 
     const startDate = new Date(start)
     const endDate = new Date(end)
@@ -163,14 +163,6 @@ const parseTimeString = (time: string, date?: Date): Date => {
   }
 }
 
-const resetTime = (timestamp: number): number => {
-  const date = new Date(timestamp)
-  date.setHours(0, 0, 0, 0)
-  date.setSeconds(0)
-  date.setMilliseconds(0)
-  return date.getTime()
-}
-
 /** A helper function for validating whether a slot is valid to be booked */
 // make sure that a slot is valid
 // this includes checking if the slot is already booked
@@ -179,7 +171,7 @@ const resetTime = (timestamp: number): number => {
 // checking if the slot is outside of dentists breaks
 export const verifySlot = async (startTime: number, dentist_id: string) => {
   try {
-    const start = resetTime(startTime)
+    const start = new Date(startTime).setUTCHours(0, 0, 0, 0)
     const THIRTY_MINUTES_MS = 1800000
     const end = start + THIRTY_MINUTES_MS
     if (start < Date.now()) return false
